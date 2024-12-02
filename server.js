@@ -38,9 +38,19 @@ app.post('/api/professores', async (req, res) => {
     }
 });
 
-app.get('/api/professores', async (req, res) => {
+app.get('/api/professores/search', async (req, res) => {
+    const searchQuery = req.query.q;
+    
+    if (!searchQuery) {
+        return res.status(400).json({ message: 'Parâmetro de busca não fornecido.' });
+    }
     try {
-        const professores = await Professor.find();
+        const professores = await Professor.find({
+            nome: { $regex: searchQuery, $options: 'i' } 
+        });
+        if (professores.length === 0) {
+            return res.status(404).json({ message: 'Nenhum professor encontrado.' });
+        }
         res.json(professores);
     } catch (error) {
         res.status(500).json({ message: error.message });
@@ -49,12 +59,20 @@ app.get('/api/professores', async (req, res) => {
 
 app.put('/api/professores/:id', async (req, res) => {
     try {
-        const professor = await Professor.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID inválido.' });
+        }
+        const professor = await Professor.findByIdAndUpdate(id, req.body, { new: true });
+        if (!professor) {
+            return res.status(404).json({ message: 'Professor não encontrado.' });
+        }
         res.json(professor);
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(500).json({ message: 'Erro no servidor.', details: error.message });
     }
 });
+
 
 app.delete('/api/professores/:id', async (req, res) => {
     try {
