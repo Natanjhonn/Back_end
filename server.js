@@ -8,6 +8,10 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+app.get('/', (req, res) => {
+    res.send('Back-end funcionando corretamente!');
+});
+
 // Modelo do banco de dados
 const ProfessorSchema = new mongoose.Schema({
     nome: { type: String, required: true },
