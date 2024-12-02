@@ -38,19 +38,9 @@ app.post('/api/professores', async (req, res) => {
     }
 });
 
-app.get('/api/professores/search', async (req, res) => {
-    const searchQuery = req.query.q;
-    
-    if (!searchQuery) {
-        return res.status(400).json({ message: 'Parâmetro de busca não fornecido.' });
-    }
+app.get('/api/professores', async (req, res) => {
     try {
-        const professores = await Professor.find({
-            nome: { $regex: searchQuery, $options: 'i' } 
-        });
-        if (professores.length === 0) {
-            return res.status(404).json({ message: 'Nenhum professor encontrado.' });
-        }
+        const professores = await Professor.find();
         res.json(professores);
     } catch (error) {
         res.status(500).json({ message: error.message });
